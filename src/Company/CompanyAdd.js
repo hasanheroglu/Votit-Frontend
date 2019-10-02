@@ -1,10 +1,10 @@
 import React from 'react';
-import {Button, Form, Card} from 'react-bootstrap';
+import {Button, Form, Card, Spinner} from 'react-bootstrap';
 
 class CompanyAdd extends React.Component{
     constructor(props){
         super(props)
-        this.state = {companyName: '', companies: []}
+        this.state = {companyName: '', companies: [], didGetCompany: false}
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
     }
@@ -24,7 +24,7 @@ class CompanyAdd extends React.Component{
         })
         .then(response => response.json())
         .then(object =>{
-            this.setState({companies: object})
+            this.setState({companies: object, didGetCompany: true})
         })
         .catch(error =>{
             console.log(error);
@@ -73,6 +73,12 @@ class CompanyAdd extends React.Component{
             </Button>
             <br/>
             {
+                this.state.didGetCompany
+                ? <h1>Companies</h1>
+                : <Spinner animation="border" variant="primary"/>
+            }
+            {
+                
                 this.state.companies.map(company => 
                     <Card key={company.id}>
                         <Card.Header>{company.name}</Card.Header>
