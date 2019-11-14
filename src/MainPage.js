@@ -10,7 +10,7 @@ class MainPage extends React.Component{
             <Navbar.Toggle aria- controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="mr-auto">
-                <Nav.Link href="#login">Login</Nav.Link>
+                <Nav.Link href="/companies">Companies</Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Navbar>
