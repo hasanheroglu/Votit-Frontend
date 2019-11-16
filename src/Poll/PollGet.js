@@ -95,6 +95,8 @@ class PollGet extends React.Component{
             this.state.optionIds.splice(index, 1);
             this.setState({selectionLimit: this.state.selectionLimit - 1});
         }
+
+        console.log(this.state.votePoints)
     }
 
     handlePrioritizedInput(event){
@@ -252,11 +254,6 @@ class PollGet extends React.Component{
                 <Card.Header>PopQ: {this.state.poll.title}</Card.Header>
                 <Card.Body>
                 <this.ShowPoll type={this.state.poll.type}/>
-                {
-                    this.state.voters.map(voter => 
-                        <p>{voter.id} {voter.name} {voter.surname}</p>
-                    )
-                }
                 <p>Total entry count: {this.state.poll.entryCount}</p>
                 <Button variant="primary" onClick={()=>{this.handleVoteClick()}}>Submit</Button>
                 </Card.Body>

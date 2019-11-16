@@ -5,13 +5,16 @@ import {Link} from 'react-router-dom';
 class PollAdd extends React.Component{
     constructor(props){
         super(props)
-        this.state = { title: '', option: '', pollType: '', polls: [], options: [], voters: [], voterIdList: [],users: [], maxSelectionCount: 1, update: false}
+        this.state = { title: '', option: '', pollType: '', polls: [], options: [], voters: [], 
+                        titles: [], selectedTitle: 'User', voterIdList: [], users: [], maxSelectionCount: 1, update: false}
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
         this.handleOptionAddClick = this.handleOptionAddClick.bind(this)
         this.handleOptionRemoveClick = this.handleOptionRemoveClick.bind(this)
         this.handleVoterAddClick = this.handleVoterAddClick.bind(this)
         this.Poll = this.Poll.bind(this)
+        this.UserList = this.UserList.bind(this)
+        this.handleAddAllClick = this.handleAddAllClick.bind(this)
     }
 
     x = () => {
@@ -62,7 +65,7 @@ class PollAdd extends React.Component{
         })
         .then(response => response.json())
         .then(object =>{
-            this.setState({users: object.users})
+            this.setState({users: object.users, titles: object.titles})
             console.log(object)
         })
         .catch(error =>{
@@ -70,8 +73,59 @@ class PollAdd extends React.Component{
         });
     }
 
+    componentDidUpdate(){
+        if(!this.state.update) {return;}
+
+        const companyName = this.props.match.params.name;
+
+        if(this.state.selectedTitle != "User"){
+
+            fetch('http://localhost:8080/companies/' + companyName + '/' + this.state.selectedTitle + '/users', {
+                method:'GET',
+                headers:{ 
+                    'Authorization': localStorage.getItem("Authorization"),
+                    'Accept':'application/json',
+                    'Content-Type':'application/json',
+                    'Access-Control-Allow-Credentials':  true,
+                    'Access-Control-Allow-Origin':'http://localhost:3000/'
+                },
+                withCredentials: true,
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(object =>{
+                this.setState({users: object, update: false})
+                console.log(object)
+            })
+            .catch(error =>{
+                console.log(error);
+            });
+        } else{
+            fetch('http://localhost:8080/companies/' + companyName + '/users', {
+                method:'GET',
+                headers:{ 
+                    'Authorization': localStorage.getItem("Authorization"),
+                    'Accept':'application/json',
+                    'Content-Type':'application/json',
+                    'Access-Control-Allow-Credentials':  true,
+                    'Access-Control-Allow-Origin':'http://localhost:3000/'
+                },
+                withCredentials: true,
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(object =>{
+                this.setState({users: object, update: false})
+                console.log(object)
+            })
+            .catch(error =>{
+                console.log(error);
+            });
+        }
+    }
+
     handleInputChange(event){
-        this.setState({[event.target.name]: event.target.value}); 
+        this.setState({[event.target.name]: event.target.value, update: true}); 
     }
 
     handleAddClick(){
@@ -130,11 +184,51 @@ class PollAdd extends React.Component{
         this.setState({update: true});
     }
 
+    handleAddAllClick(){
+        this.setState({voters: this.state.users});
+        console.log(this.state.voters);
+        console.log(this.state.users);
+        this.setState({update: true});
+    }
+
     handleVoterRemoveClick(user){
         this.state.users.push(user);
         var voterIndex = this.state.voters.indexOf(user);
         this.state.voters.splice(voterIndex, 1);
         this.setState({update: true});
+    }
+
+    UserList(){
+        return(
+            <div>
+                <Form.Group controlId="selectedTitle">
+                            <Form.Label>Title</Form.Label>
+                            <Form.Control as="select" name="selectedTitle" onChange={this.handleInputChange}>
+                                <option value="User"  selected>All</option>
+                                {
+                                    this.state.titles.map(title=>
+                                        <option value={title.title}>{title.title}</option>    
+                                    )
+                                }       
+                            </Form.Control>
+                </Form.Group>
+
+                <p>List of {this.state.selectedTitle}(s)</p>
+                {
+                    this.state.users.map(user =>
+                        <p key={user.id}>{user.id} {user.name} {user.surname} <Button variant="success" onClick={()=>{this.handleVoterAddClick(user)}}>Add to Poll</Button></p>
+                    )
+                }
+                <Button variant="success" onClick={() => {this.handleAddAllClick()}}>Add all</Button>
+                <br/>
+                <p>Added Users</p>
+                {
+                    this.state.voters.map(voter =>
+                        <p key={voter.id}>{voter.id} {voter.name} {voter.surname} <Button variant="danger" onClick={()=>{this.handleVoterRemoveClick(voter)}}>Remove from Poll</Button></p>
+                    )
+                }
+            </div>
+        )
     }
 
     Poll() {
@@ -182,7 +276,9 @@ class PollAdd extends React.Component{
                 </Form.Group>
                 <Button block variant="primary" onClick={()=>{this.handleOptionAddClick()}}>
                     Add Option
-                </Button>                
+                </Button>
+
+                <this.UserList/>                
                 
                 <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
                     Submit Poll
@@ -196,19 +292,8 @@ class PollAdd extends React.Component{
                 
                 <div>
                 <this.Poll/>
-                <p>List of Users</p>
-                {
-                    this.state.users.map(user =>
-                        <p key={user.id}>{user.id} {user.name} {user.surname} <Button variant="success" onClick={()=>{this.handleVoterAddClick(user)}}>Add to Poll</Button></p>
-                    )
-                }
-                <br/>
-                <p>Added Users</p>
-                {
-                    this.state.voters.map(voter =>
-                        <p key={voter.id}>{voter.id} {voter.name} {voter.surname} <Button variant="danger" onClick={()=>{this.handleVoterRemoveClick(voter)}}>Remove from Poll</Button></p>
-                    )
-                }
+                
+            
                 {
                     this.state.polls.map(poll => 
                         <Card key={poll.id}>
