@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, Form, Card, Spinner, Table} from 'react-bootstrap';
-import {Link} from 'react-router-dom';
-
+import {BrowserRouter, Route, Link, Redirect} from 'react-router-dom';
+import Login from '../Login';
 
 class CompanyAdd extends React.Component{
     constructor(props){
@@ -89,6 +89,8 @@ class CompanyAdd extends React.Component{
     }
 
     render(){
+        if(!localStorage.getItem("Roles")){ return <Redirect to={"/login"} component={Login} />}
+
         return(
             <Form>
             <Form.Group controlId="companyName">

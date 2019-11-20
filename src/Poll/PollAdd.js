@@ -5,8 +5,11 @@ import {Link} from 'react-router-dom';
 class PollAdd extends React.Component{
     constructor(props){
         super(props)
-        this.state = { title: '', option: '', pollType: '', polls: [], options: [], voters: [], 
-                        titles: [], selectedTitle: 'User', voterIdList: [], users: [], maxSelectionCount: 1, update: false}
+        this.state = { title: '', option: '', 
+                        pollType: '', polls: [], startDate:'', endDate:'', options: [], maxSelectionCount: 1,
+                        titles: [], selectedTitle: 'User', 
+                        voters: [], voterIdList: [], users: [], 
+                        update: false}
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
         this.handleOptionAddClick = this.handleOptionAddClick.bind(this)
@@ -150,6 +153,8 @@ class PollAdd extends React.Component{
             body: JSON.stringify({title: this.state.title,
                                   type: this.state.pollType,
                                   options: this.state.options,
+                                  startDate: this.state.startDate,
+                                  endDate: this.state.endDate,
                                   voterIdList: this.state.voterIdList,
                                   maxSelectionCount: this.state.maxSelectionCount
                                 })
@@ -251,7 +256,14 @@ class PollAdd extends React.Component{
                     <Form.Label>Poll Title</Form.Label>
                     <Form.Control name="title" type="text" placeholder="Poll Title" value={this.state.title} onChange={this.handleInputChange}/>
                 </Form.Group>
-                
+                <Form.Group controlId="startDate">
+                    <Form.Label>Poll Start Date</Form.Label>
+                    <Form.Control name="startDate" type="date" value={this.state.startDate} onChange={this.handleInputChange}/>
+                </Form.Group>
+                <Form.Group controlId="endDate">
+                    <Form.Label>Poll End Date</Form.Label>
+                    <Form.Control name="endDate" type="date" value={this.state.endDate} onChange={this.handleInputChange}/>
+                </Form.Group>
                 <Form.Group controlId="maxSelectionCount">
                     <Form.Label>Maximum Selection Count</Form.Label>
                     <Form.Control as="select" name="maxSelectionCount" onChange={this.handleInputChange}>
