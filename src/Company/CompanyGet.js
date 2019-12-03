@@ -135,7 +135,7 @@ class CompanyGet extends React.Component{
                     <Card.Body>
                         {
                             this.state.polls.map(poll=>
-                                <Link key={poll.id} to={"/company/" + this.state.company.name + "/polls/" + poll.id}><p>{poll.title}</p></Link>    
+                                <Link key={poll.id} to={"/companies/" + this.state.company.name + "/polls/" + poll.id}><p>{poll.title}</p></Link>    
                             )
                         }
                     </Card.Body>
