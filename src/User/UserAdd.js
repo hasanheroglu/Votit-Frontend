@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Card, Spinner} from 'react-bootstrap';
+import {Button, Form, Image} from 'react-bootstrap';
 import { thisExpression } from '@babel/types';
 
 class UserAdd extends React.Component{
@@ -41,9 +41,10 @@ class UserAdd extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            this.setState({availableTitles: object});
-            console.log(object);
+        .then(result =>{
+            if(result.wasSuccessful)
+                this.setState({availableTitles: result.operationObject});
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -62,9 +63,9 @@ class UserAdd extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            this.setState({availableRoles: object});
-            console.log(object);
+        .then(result =>{
+            this.setState({availableRoles: result.operationObject});
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -73,7 +74,6 @@ class UserAdd extends React.Component{
 
     handleAddClick(){
         const companyName = this.props.match.params.name;
-        console.log(this.state.accessibilityOptions);
 
         fetch('http://localhost:8080/companies/' + companyName + '/users', {
             method:'POST',
@@ -99,12 +99,13 @@ class UserAdd extends React.Component{
         
         })
         .then(response => response.json())
-        .then(object =>{
-            alert("i am inside")
-            console.log(object);
+        .then(result =>{
+            console.log(result);
+            alert("User Added!");
         })
         .catch(error =>{
             console.log(error);
+            alert("Cannot add user!");
         });
     }
 
@@ -159,12 +160,12 @@ class UserAdd extends React.Component{
     UserForm(){
         return(
             <Form>
-            <this.StandardInfo/>
-            <this.RoleMenu/>
-            <this.TitleMenu/>
-            <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
-                Add
-            </Button>
+                <this.StandardInfo/>
+                <this.RoleMenu/>
+                <this.TitleMenu/>
+                <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
+                    Add
+                </Button>
             </Form>
         )
     }
@@ -219,7 +220,7 @@ class UserAdd extends React.Component{
                             }   
                         </Form.Control>
                         <br/>
-                        <Button variant="primary" onClick={()=> {this.handleAddRoleClick(this.state.role)}}>Add role</Button>
+                        <Button block variant="primary" onClick={()=> {this.handleAddRoleClick(this.state.role)}}>Add role</Button>
                 </Form.Group>
 
                 <div inline>
@@ -249,7 +250,7 @@ class UserAdd extends React.Component{
                             }   
                         </Form.Control>
                         <br/>
-                        <Button variant="primary" onClick={()=> {this.handleAddTitleClick(this.state.title)}}>Add title</Button>
+                        <Button block variant="primary" onClick={()=> {this.handleAddTitleClick(this.state.title)}}>Add title</Button>
                 </Form.Group>
 
                 <div inline>
@@ -266,7 +267,10 @@ class UserAdd extends React.Component{
 
     render(){
         return(
-            <this.UserForm/>
+            <div style={{width: 500, margin:0, margin:"auto"}}>
+                <Image src={require('../logo1.jpeg')} rounded fluid />
+                <this.UserForm/>
+            </div>
         )
     }
 }

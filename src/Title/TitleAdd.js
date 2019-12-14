@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Card, Spinner} from 'react-bootstrap';
+import {Button, Form, Image} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 
 class TitleAdd extends React.Component{
@@ -29,9 +29,8 @@ class TitleAdd extends React.Component{
         
         })
         .then(response => response.json())
-        .then(object =>{
-            alert("i am inside")
-            console.log(object);
+        .then(result =>{
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -44,15 +43,18 @@ class TitleAdd extends React.Component{
 
     render(){
         return(
-            <Form>
-                <Form.Group controlId="title">
-                    <Form.Label>Title</Form.Label>
-                    <Form.Control name="title" type="text" placeholder="Title" value={this.state.title} onChange={this.handleInputChange}/>
-                </Form.Group>
-                <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
-                    Add
-                </Button>
-            </Form>
+            <div style={{width: 500, margin:0, margin:"auto"}}>
+                <Image src={require('../logo1.jpeg')} rounded fluid />
+                <Form>
+                    <Form.Group controlId="title">
+                        <Form.Label>Title</Form.Label>
+                        <Form.Control name="title" type="text" placeholder="Title" value={this.state.title} onChange={this.handleInputChange}/>
+                    </Form.Group>
+                    <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
+                        Add
+                    </Button>
+                </Form>
+            </div>
         )
     }
 }

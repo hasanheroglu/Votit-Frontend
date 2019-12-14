@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Card, Spinner, Table, Dropdown, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import {Button, Form, Card, Image} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 
 class PollAdd extends React.Component{
@@ -9,13 +9,16 @@ class PollAdd extends React.Component{
                         pollType: '', polls: [], startDate:'', endDate:'', options: [], maxSelectionCount: 1,
                         titles: [], selectedTitle: 'User', 
                         voters: [], voterIdList: [], users: [], 
-                        update: false}
+                        owner: [],
+                        update: false
+                    }
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
         this.handleOptionAddClick = this.handleOptionAddClick.bind(this)
         this.handleOptionRemoveClick = this.handleOptionRemoveClick.bind(this)
         this.handleVoterAddClick = this.handleVoterAddClick.bind(this)
         this.Poll = this.Poll.bind(this)
+        this.PollInfo = this.PollInfo.bind(this)
         this.UserList = this.UserList.bind(this)
         this.handleAddAllClick = this.handleAddAllClick.bind(this)
     }
@@ -46,9 +49,11 @@ class PollAdd extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            this.setState({polls: object})
-            console.log(object)
+        .then(result =>{
+            if(result.wasSuccessful){
+                this.setState({polls: result.operationObject});
+            }
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -67,9 +72,31 @@ class PollAdd extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            this.setState({users: object.users, titles: object.titles})
-            console.log(object)
+        .then(result =>{
+            this.setState({users: result.operationObject.users, titles: result.operationObject.titles});
+            console.log(result);
+        })
+        .catch(error =>{
+            console.log(error);
+        });
+
+        let email = localStorage.getItem("Username");
+        fetch('http://localhost:8080/users?email=' + email, {
+            method:'GET',
+            headers:{ 
+                'Authorization': localStorage.getItem("Authorization"),
+                'Accept':'application/json',
+                'Content-Type':'application/json',
+                'Access-Control-Allow-Credentials':  true,
+                'Access-Control-Allow-Origin':'http://localhost:3000/'
+            },
+            withCredentials: true,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(result =>{
+            this.setState({owner: result.operationObject, polls: result.operationObject.polls});
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -96,9 +123,9 @@ class PollAdd extends React.Component{
                 credentials: 'same-origin'
             })
             .then(response => response.json())
-            .then(object =>{
-                this.setState({users: object, update: false})
-                console.log(object)
+            .then(result =>{
+                this.setState({users: result.operationObject, update: false});
+                console.log(result);
             })
             .catch(error =>{
                 console.log(error);
@@ -117,9 +144,9 @@ class PollAdd extends React.Component{
                 credentials: 'same-origin'
             })
             .then(response => response.json())
-            .then(object =>{
-                this.setState({users: object, update: false})
-                console.log(object)
+            .then(result =>{
+                this.setState({users: result.operationObject, update: false})
+                console.log(result);
             })
             .catch(error =>{
                 console.log(error);
@@ -156,15 +183,15 @@ class PollAdd extends React.Component{
                                   startDate: this.state.startDate,
                                   endDate: this.state.endDate,
                                   voterIdList: this.state.voterIdList,
-                                  maxSelectionCount: this.state.maxSelectionCount
+                                  maxSelectionCount: this.state.maxSelectionCount,
+                                  ownerId: this.state.owner.id
                                 })
         
         
         })
         .then(response => response.json())
-        .then(object =>{
-            console.log(object);
-            alert("i am inside")
+        .then(result =>{
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -221,10 +248,10 @@ class PollAdd extends React.Component{
                 <p>List of {this.state.selectedTitle}(s)</p>
                 {
                     this.state.users.map(user =>
-                        <p key={user.id}>{user.id} {user.name} {user.surname} <Button variant="success" onClick={()=>{this.handleVoterAddClick(user)}}>Add to Poll</Button></p>
+                        <p key={user.id}>{user.id} {user.name} {user.surname} <Button block variant="success" onClick={()=>{this.handleVoterAddClick(user)}}>Add to Poll</Button></p>
                     )
                 }
-                <Button variant="success" onClick={() => {this.handleAddAllClick()}}>Add all</Button>
+                <Button block variant="success" onClick={() => {this.handleAddAllClick()}}>Add all</Button>
                 <br/>
                 <p>Added Users</p>
                 {
@@ -236,13 +263,14 @@ class PollAdd extends React.Component{
         )
     }
 
-    Poll() {
-        return(
+    Poll(props) {
+        if(props.hidden){
+            return(
+                <p></p>
+            )
+        }
+        return(                
             <Form>
-                <Form.Group controlId="pollImage">
-                    <Form.Label>Poll Image</Form.Label>
-                    <Form.Control type="file" name="pollImage" onChange={this.handleInputChange} />
-                </Form.Group>
                 <Form.Group controlId="pollType">
                     <Form.Label>Poll Type</Form.Label>
                     <Form.Control as="select" name="pollType" onChange={this.handleInputChange}>
@@ -299,29 +327,47 @@ class PollAdd extends React.Component{
         )
     }
 
-    render(){
-        return(
-                
-                <div>
-                <this.Poll/>
-                
-            
-                {
-                    this.state.polls.map(poll => 
-                        <Card key={poll.id}>
-                            <Card.Header>{poll.title}</Card.Header>
-                            <Card.Body>
-                                {
-                                    poll.options.map(option=>
-                                        <p key={option.id}>{option.body} Count: {option.count/poll.entryCount}</p>
-                                    )
-                                }
-                            </Card.Body>
-                        </Card>
-                    )
-                }
+    PollInfo(){
+        if(this.state.polls.length === 0){
+            return(
+                <p>You are not invited to any poll.</p>
+            )
+        }
 
-                </div>
+        return(
+            this.state.polls.map(poll => 
+                <Card key={poll.id}>
+                    <Card.Header>{poll.title}</Card.Header>
+                    <Card.Body>
+                        {
+                            poll.options.map(option=>
+                                <p key={option.id}>{option.body} Count: {option.count/poll.entryCount}</p>
+                            )
+                        }
+                    </Card.Body>
+                </Card>
+            )
+        )
+    }
+
+    render(){
+        var isPollOwner = false;
+
+        let roles = localStorage.getItem("Roles");
+        if(roles){
+          if(roles.includes("ROLE_POLL_OWNER")){
+            isPollOwner = true;
+          } else{
+            isPollOwner = false;
+          }
+        }
+
+        return(    
+            <div style={{width:500, margin:0, margin:"auto"}}>
+                <Image src={require('../logo1.jpeg')} rounded fluid />
+                <this.Poll hidden={!isPollOwner}/>
+                <this.PollInfo/>
+            </div>
         )
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
-import {Redirect} from 'react-router-dom';
-import { Form,FormGroup, FormLabel, FormControl, Button } from 'react-bootstrap';
+import { Form,FormGroup, FormLabel, FormControl, Button, Image } from 'react-bootstrap';
+import {votit} from './logo1.jpeg';
 
 class Login extends React.Component{
     constructor(props){
@@ -56,18 +56,17 @@ class Login extends React.Component{
     render(){
         return(
 
-            <div>
+            <div style={{width: 500, margin: 0, margin: "auto"}}>
+            <Image src={require('./logo1.jpeg')} rounded fluid />
             <Form >
                 <FormGroup>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl type="text" name="email" value={this.state.email} onChange={this.handleInputChange} />
                     <FormLabel>Password</FormLabel>
                     <FormControl type="password" name="password" value={this.state.password} onChange={this.handleInputChange} />
+                    <br/>
                     <Button block onClick={() => this.handleLoginClick()}>Login</Button>
                 </FormGroup>
-        <p>{this.state.email}</p>
-        <p>{this.state.password}</p>
-
             </Form>
             </div>
         )

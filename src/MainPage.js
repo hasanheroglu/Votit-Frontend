@@ -25,9 +25,9 @@ class MainPage extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            this.setState({user: object});
-            console.log(object);
+        .then(result =>{
+            this.setState({user: result.operationObject});
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -75,17 +75,16 @@ class MainPage extends React.Component{
         return(
           <div>
             <Navbar bg="light" expand="lg">
-            <Navbar.Brand href="/">VOTIT</Navbar.Brand>
+            <Navbar.Brand href="/" style={{width: 50, height: 50}}><Image src={require('./votit_logo_small.png')} rounded fluid /></Navbar.Brand>
             <Navbar.Toggle aria- controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="mr-auto">
+                <Nav.Link hidden={isUser} href="/login">Login</Nav.Link>
                 <Nav.Link hidden={!isSystemAdmin} href="/companies">Companies</Nav.Link>
                 <Nav.Link hidden={!isUser} href={"/companies/" + this.state.user.companyName + "/polls"}>My Polls</Nav.Link>
-        <Nav.Link hidden={!isUser} href={"/companies/" + this.state.user.companyName}   >{this.state.user.companyName}</Nav.Link>
-        <Nav.Link hidden={!isUser} href={"/users/" + this.state.user.id}>{this.state.user.name + " " + this.state.user.surname}</Nav.Link>
-        <Nav.Link hidden={!isUser} onClick={() => {this.handleLogoutClick()}}>Logout</Nav.Link>
-
-
+                <Nav.Link hidden={!isUser} href={"/companies/" + this.state.user.companyName}   >{this.state.user.companyName}</Nav.Link>
+                <Nav.Link hidden={!isUser} href={"/users/" + this.state.user.id}>{this.state.user.name + " " + this.state.user.surname}</Nav.Link>
+                <Nav.Link hidden={!isUser} onClick={() => {this.handleLogoutClick()}}>Logout</Nav.Link>
               </Nav>
             </Navbar.Collapse>
             </Navbar>

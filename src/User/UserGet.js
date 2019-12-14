@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Card, Spinner} from 'react-bootstrap';
+import {Button, Form, Card, Spinner, Image} from 'react-bootstrap';
 
 class UserGet extends React.Component{
     constructor(props){
@@ -30,9 +30,11 @@ class UserGet extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            this.setState({user: object, title: '', titles: object.titles, roles: object.roles, accessibilityOptions: object.accessibilityOptions, companyName: object.companyName, didGetUser: true})
-            console.log(object);
+        .then(result =>{
+            this.setState({user: result.operationObject, title: '', titles: result.operationObject.titles, 
+                            roles: result.operationObject.roles, accessibilityOptions: result.operationObject.accessibilityOptions, 
+                            companyName: result.operationObject.companyName, didGetUser: true})
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -51,9 +53,9 @@ class UserGet extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            console.log(object);
-            this.setState({company: object[0], companyTitles: object[0].titles})
+        .then(result =>{
+            console.log(result);
+            this.setState({company: result.operationObject[0], companyTitles: result.operationObject[0].titles})
         })
         .catch(error =>{
             console.log(error);
@@ -72,9 +74,9 @@ class UserGet extends React.Component{
             credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(object =>{
-            console.log(object);
-            this.setState({possibleRoles: object})
+        .then(result =>{
+            console.log(result);
+            this.setState({possibleRoles: result.operationObject})
         })
         .catch(error =>{
             console.log(error);
@@ -102,9 +104,8 @@ class UserGet extends React.Component{
         
         })
         .then(response => response.json())
-        .then(object =>{
-            alert("i am inside")
-            console.log(object);
+        .then(result =>{
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -128,9 +129,8 @@ class UserGet extends React.Component{
         
         })
         .then(response => response.json())
-        .then(object =>{
-            alert("i am inside")
-            console.log(object);
+        .then(result =>{
+            console.log(result);
         })
         .catch(error =>{
             console.log(error);
@@ -140,7 +140,7 @@ class UserGet extends React.Component{
     UserInfo(){
         return(
             <Card>
-                <Card.Header>Info</Card.Header>
+                <Card.Header><b>Info</b></Card.Header>
                 <Card.Body>
                     <p>Company: {this.state.user.companyName}</p>
                     <p>Email: {this.state.user.email}</p>
@@ -153,7 +153,7 @@ class UserGet extends React.Component{
     TitleInfo(){
         return(
             <Card>
-                <Card.Header>Titles</Card.Header>
+                <Card.Header><b>Titles</b></Card.Header>
                 <Card.Body>
                 <select name="title" onChange={this.handleInputChange}>
                     {
@@ -179,7 +179,7 @@ class UserGet extends React.Component{
     RoleInfo(){
         return(
             <Card>
-                <Card.Header>Roles</Card.Header>
+                <Card.Header><b>Roles</b></Card.Header>
                 <Card.Body>
                 <select name="role" onChange={this.handleInputChange}>
                     {
@@ -203,7 +203,7 @@ class UserGet extends React.Component{
     AccessibilityInfo(){
         return(
             <Card>
-                <Card.Header>Accessibility Options</Card.Header>
+                <Card.Header><b>Accessibility Options</b></Card.Header>
                 <Card.Body>
                 {
                     this.state.accessibilityOptions.map(accessibilityOption =>
@@ -218,24 +218,21 @@ class UserGet extends React.Component{
         )
     }
     
-
-
     render(){
         return(
-            <div>
-                <Card>
-                    <Card.Header><b>{this.state.user.name} {this.state.user.surname}</b></Card.Header>
-                    <Card.Body>
-                        <div inline>
+            <div style={{width:500, margin:0, margin:"auto"}}>
+                <Image src={require('../logo1.jpeg')} rounded fluid />
+                {
+                    this.state.didGetUser
+                    ?   <div>
+                            <p><b>{this.state.user.name} {this.state.user.surname}</b></p>
                             <this.UserInfo/>
                             <this.TitleInfo/>
                             <this.RoleInfo/>
                             <this.AccessibilityInfo/>
                         </div>
-                    </Card.Body>
-                </Card>
-                
-                
+                    : <div style={{width:50, margin:0, margin:"auto"}}><Spinner animation="grow" variant="white"><Image src={require('../votit_logo_small.png')} rounded fluid /></Spinner></div>
+                }
             </div>
         )
     }
