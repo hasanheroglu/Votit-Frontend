@@ -11,6 +11,8 @@ class CompanyGet extends React.Component{
                         updatedEstablishmentDate: [], updatedDescription: '', willUpdate: false}
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleUserRemoveClick = this.handleUserRemoveClick.bind(this)
+        this.handleTitleRemoveClick = this.handleTitleRemoveClick.bind(this)
+        this.handlePollRemoveClick = this.handlePollRemoveClick.bind(this)
         this.handleUpdateClick = this.handleUpdateClick.bind(this)
         this.CompanyInfo = this.CompanyInfo.bind(this)
         this.CompanyInfoUpdate = this.CompanyInfoUpdate.bind(this)
@@ -92,6 +94,32 @@ class CompanyGet extends React.Component{
         });
     }
 
+    handleTitleRemoveClick(titleId){
+        fetch('http://localhost:8080/companies/' + this.state.company.name + '/titles/' + titleId, {
+            method:'DELETE',
+            headers:{ 
+                'Authorization': localStorage.getItem("Authorization"),
+                'Accept':'application/json',
+                'Content-Type':'application/json',
+                'Access-Control-Allow-Credentials':  true,
+                'Access-Control-Allow-Origin':'http://localhost:3000/'
+            },
+            withCredentials: true,
+            credentials: 'same-origin'        
+        })
+        .then(response => response.json())
+        .then(result =>{
+            console.log(result.operationObject);
+        })
+        .catch(error =>{
+            console.log(error);
+        });
+    }
+
+    handlePollRemoveClick(pollId){
+
+    }
+
     handleUpdateClick(){
         this.setState({willUpdate: false});
 
@@ -167,7 +195,7 @@ class CompanyGet extends React.Component{
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey="1">
                     <Card.Body>
-                    <Table striped bordered hover>
+                    <Table>
                         <thead>
                             <tr>
                                 <th>Person</th>
@@ -181,7 +209,7 @@ class CompanyGet extends React.Component{
                                 <td>{user.name} {user.surname}</td>    
                                 <td>
                                 <Link to={"/users/" + user.id}><Button variant="info" ><b>Info</b></Button></Link>
-                                    <Button hidden={props.hidden} variant="danger" onClick={()=>{this.handleUserRemoveClick(user.id)}}><b>X</b></Button>
+                                    <Button hidden={props.hidden} variant="danger" onClick={()=>{this.handleUserRemoveClick(user.id)}}><b>-</b></Button>
                                 </td>
                             </tr>
                         )
@@ -205,12 +233,26 @@ class CompanyGet extends React.Component{
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey="2">
                 <Card.Body>
+                    <Table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Operation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                this.state.titles.map(title=>
+                                    <tr key={title.id}> 
+                                        <td>{title.title}</td>
+                                        <td><Button block variant="danger" onClick={()=>{this.handleTitleRemoveClick(title.id)}}>-</Button></td>
+                                    </tr>
+                                )
+                            }
+                        </tbody>
+                    </Table>
                 {
-                    this.state.titles.map(title=>
-                        <p>
-                            {title.title}
-                        </p>
-                    )
+                    
                 }
                 </Card.Body>
                 </Accordion.Collapse>
@@ -228,13 +270,36 @@ class CompanyGet extends React.Component{
                     </Link>
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey="3">
-                    <Card.Body>
-                        {
-                            this.state.polls.map(poll=>
-                                <Link key={poll.id} to={"/companies/" + this.state.company.name + "/polls/" + poll.id}><p>{poll.title}</p></Link>    
-                            )
-                        }
-                    </Card.Body>
+                <Table>
+                    <thead>
+                        <tr>
+                            <th>Poll Title</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Owner ID</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                    {
+                        this.state.polls.map(poll =>
+                            
+                            <tr key={poll.id}>
+                                <td>{poll.title}</td>
+                                <td>{poll.startDate.substring(0,10)}</td>
+                                <td>{poll.endDate.substring(0,10)}</td>
+                                <td>{poll.ownerId}</td>
+                                <td>
+                                <Link to={"/companies/" + this.props.match.params.name + "/polls/" + poll.id} key={poll.id}>
+                                    <Button block variant="success">Vote</Button>
+                                </Link>
+                                </td>
+                            </tr>
+                        )
+                    }
+                    </tbody>
+                </Table>
                 </Accordion.Collapse>
             </Card>
         )

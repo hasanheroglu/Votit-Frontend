@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Card, Image} from 'react-bootstrap';
+import {Button, Form, Card, Image, Alert, Table} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 
 class PollAdd extends React.Component{
@@ -10,7 +10,8 @@ class PollAdd extends React.Component{
                         titles: [], selectedTitle: 'User', 
                         voters: [], voterIdList: [], users: [], 
                         owner: [],
-                        update: false
+                        update: false,
+                        addAttempt: false,
                     }
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
@@ -35,6 +36,35 @@ class PollAdd extends React.Component{
 
     componentDidMount(){
         const companyName = this.props.match.params.name;
+
+        var isSystemAdmin = false;
+        var isCompanyAdmin = false;
+        var isPollOwner = false;
+        var isUser = false;
+
+        let roles = localStorage.getItem("Roles");
+        if(roles){
+          if(roles.includes("ROLE_SYSTEM_ADMIN")){
+              isSystemAdmin = true;
+          } else{
+              isSystemAdmin = false;
+          }
+          if(roles.includes("ROLE_COMPANY_ADMIN")){
+              isCompanyAdmin = true;
+          } else{
+              isCompanyAdmin = false;
+          }
+          if(roles.includes("ROLE_POLL_OWNER")){
+            isPollOwner = true;
+          } else{
+            isPollOwner = false;
+          }
+          if(roles.includes("ROLE_USER")){
+            isUser = true;
+          } else{
+            isUser = false;
+          }
+        }
 
         fetch('http://localhost:8080/companies/' + companyName + '/polls', {
             method:'GET',
@@ -159,6 +189,15 @@ class PollAdd extends React.Component{
     }
 
     handleAddClick(){
+        
+        if(!this.state.pollType || !this.state.title 
+            || !this.state.startDate || !this.state.endDate
+            || this.state.options.length < 2 || this.state.options.length > 10){
+            
+            this.setState({addAttempt: true});
+            return;
+        }
+
         const companyName = this.props.match.params.name;
 
         for (let index = 0; index < this.state.voters.length; index++) {
@@ -199,6 +238,9 @@ class PollAdd extends React.Component{
     }
 
     handleOptionAddClick(){
+        if(this.state.options.length == 10){
+            alert("Too many options!");
+        }
         this.state.options.push(this.state.option);
         this.setState({update: true});
     }
@@ -210,21 +252,21 @@ class PollAdd extends React.Component{
     }
 
     handleVoterAddClick(voter){
+        if(this.state.voters.some(v => (v.id === voter.id))){
+            alert("User already added!")
+            return;
+        }
+
         this.state.voters.push(voter);
-        var userIndex = this.state.users.indexOf(voter);
-        this.state.users.splice(userIndex, 1);
         this.setState({update: true});
     }
 
     handleAddAllClick(){
         this.setState({voters: this.state.users});
-        console.log(this.state.voters);
-        console.log(this.state.users);
         this.setState({update: true});
     }
 
     handleVoterRemoveClick(user){
-        this.state.users.push(user);
         var voterIndex = this.state.voters.indexOf(user);
         this.state.voters.splice(voterIndex, 1);
         this.setState({update: true});
@@ -233,6 +275,8 @@ class PollAdd extends React.Component{
     UserList(){
         return(
             <div>
+                <h2>Add Voters</h2>
+
                 <Form.Group controlId="selectedTitle">
                             <Form.Label>Title</Form.Label>
                             <Form.Control as="select" name="selectedTitle" onChange={this.handleInputChange}>
@@ -246,19 +290,54 @@ class PollAdd extends React.Component{
                 </Form.Group>
 
                 <p>List of {this.state.selectedTitle}(s)</p>
-                {
-                    this.state.users.map(user =>
-                        <p key={user.id}>{user.id} {user.name} {user.surname} <Button block variant="success" onClick={()=>{this.handleVoterAddClick(user)}}>Add to Poll</Button></p>
-                    )
-                }
+                <Table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Surname</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            this.state.users.map(user =>
+                                <tr key={user.id}>
+                                    <td>{user.id}</td>
+                                    <td>{user.name}</td>
+                                    <td>{user.surname}</td>
+                                    <td><Button block variant="success" onClick={()=>{this.handleVoterAddClick(user)}}>+</Button></td>
+                                </tr>
+                            )
+                        }
+                    </tbody>
+                </Table>
+                
                 <Button block variant="success" onClick={() => {this.handleAddAllClick()}}>Add all</Button>
                 <br/>
                 <p>Added Users</p>
-                {
-                    this.state.voters.map(voter =>
-                        <p key={voter.id}>{voter.id} {voter.name} {voter.surname} <Button variant="danger" onClick={()=>{this.handleVoterRemoveClick(voter)}}>Remove from Poll</Button></p>
-                    )
-                }
+                <Table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Surname</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            this.state.voters.map(voter =>
+                                <tr key={voter.id}>
+                                    <td>{voter.id}</td>
+                                    <td>{voter.name}</td>
+                                    <td>{voter.surname}</td>
+                                    <td><Button block variant="danger" onClick={()=>{this.handleVoterRemoveClick(voter)}}>-</Button></td>
+                                </tr>
+                            )
+                        }
+                    </tbody>
+                </Table>
             </div>
         )
     }
@@ -271,6 +350,9 @@ class PollAdd extends React.Component{
         }
         return(                
             <Form>
+
+                <h2>Poll Info</h2>
+
                 <Form.Group controlId="pollType">
                     <Form.Label>Poll Type</Form.Label>
                     <Form.Control as="select" name="pollType" onChange={this.handleInputChange}>
@@ -279,20 +361,24 @@ class PollAdd extends React.Component{
                         <option value="prioritized">Prioritized</option>
                         <option value="multiple_choice">Multiple Choice</option>
                     </Form.Control>
+                    <Alert variant="danger" hidden={this.state.pollType || !this.state.addAttempt} >Poll type must be chosen!</Alert>
                 </Form.Group>
                 <Form.Group controlId="title">
                     <Form.Label>Poll Title</Form.Label>
                     <Form.Control name="title" type="text" placeholder="Poll Title" value={this.state.title} onChange={this.handleInputChange}/>
+                    <Alert variant="danger" hidden={this.state.title || !this.state.addAttempt} >Poll title cannot be empty!</Alert>
                 </Form.Group>
                 <Form.Group controlId="startDate">
                     <Form.Label>Poll Start Date</Form.Label>
                     <Form.Control name="startDate" type="date" value={this.state.startDate} onChange={this.handleInputChange}/>
+                    <Alert variant="danger" hidden={this.state.startDate || !this.state.addAttempt} >Poll Start Date must have been set!</Alert>
                 </Form.Group>
                 <Form.Group controlId="endDate">
                     <Form.Label>Poll End Date</Form.Label>
                     <Form.Control name="endDate" type="date" value={this.state.endDate} onChange={this.handleInputChange}/>
+                    <Alert variant="danger" hidden={this.state.endDate || !this.state.addAttempt} >Poll End Date must have been set!</Alert>
                 </Form.Group>
-                <Form.Group controlId="maxSelectionCount">
+                <Form.Group  hidden={!this.state.pollType || !(this.state.pollType === "prioritized" ||this.state.pollType === "multiple_choice")} controlId="maxSelectionCount">
                     <Form.Label>Maximum Selection Count</Form.Label>
                     <Form.Control as="select" name="maxSelectionCount" onChange={this.handleInputChange}>
                         <option value="" disabled selected>Select your number of maximum selections</option>
@@ -303,13 +389,7 @@ class PollAdd extends React.Component{
                     </Form.Control>
                 </Form.Group>
 
-                {
-                    this.state.options.map(option=>
-                        <div>
-                        <Button block variant="danger" onClick={()=>{this.handleOptionRemoveClick(option)}}><b>{option}</b></Button><br/>
-                        </div>
-                    )
-                }
+                <h2>Options</h2>
 
                 <Form.Group controlId="title">
                     <Form.Control name="option" type="text" placeholder="Option" value={this.state.option} onChange={this.handleInputChange}/>
@@ -317,10 +397,20 @@ class PollAdd extends React.Component{
                 <Button block variant="primary" onClick={()=>{this.handleOptionAddClick()}}>
                     Add Option
                 </Button>
+                <br/>
+                {
+                    this.state.options.map(option=>
+                        <div>
+                        <Button block variant="danger" onClick={()=>{this.handleOptionRemoveClick(option)}}><b>{option}</b></Button><br/>
+                        </div>
+                    )
+                }
+                <Alert variant="danger" hidden={(this.state.options.length >= 2 && this.state.options.length <= 10) || !this.state.addAttempt} >Poll must have at least 2 at most 10 options!</Alert>
 
+                <br/>
                 <this.UserList/>                
                 
-                <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
+                <Button block variant="primary" onClick={()=>{this.handleAddClick()}}>
                     Submit Poll
                 </Button>
             </Form>
@@ -335,18 +425,36 @@ class PollAdd extends React.Component{
         }
 
         return(
-            this.state.polls.map(poll => 
-                <Card key={poll.id}>
-                    <Card.Header>{poll.title}</Card.Header>
-                    <Card.Body>
-                        {
-                            poll.options.map(option=>
-                                <p key={option.id}>{option.body} Count: {option.count/poll.entryCount}</p>
-                            )
-                        }
-                    </Card.Body>
-                </Card>
-            )
+            <Table>
+                <thead>
+                    <tr>
+                        <th>Poll Title</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Owner ID</th>
+                        <th>Operation</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                {
+                    this.state.polls.map(poll =>
+                        
+                        <tr key={poll.id}>
+                            <td>{poll.title}</td>
+                            <td>{poll.startDate.substring(0,10)}</td>
+                            <td>{poll.endDate.substring(0,10)}</td>
+                            <td>{poll.ownerId}</td>
+                            <td>
+                            <Link to={"/companies/" + this.props.match.params.name + "/polls/" + poll.id} key={poll.id}>
+                                <Button block variant="success">Vote</Button>
+                            </Link>
+                            </td>
+                        </tr>
+                    )
+                }
+                </tbody>
+            </Table>
         )
     }
 
@@ -366,6 +474,7 @@ class PollAdd extends React.Component{
             <div style={{width:500, margin:0, margin:"auto"}}>
                 <Image src={require('../logo1.jpeg')} rounded fluid />
                 <this.Poll hidden={!isPollOwner}/>
+                <br/><h2>Your Polls</h2>
                 <this.PollInfo/>
             </div>
         )

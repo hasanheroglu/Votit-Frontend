@@ -1,12 +1,16 @@
 import React from 'react';
-import {Button, Form, Card, Spinner, Table, Nav, Image} from 'react-bootstrap';
+import {Button, Form, Card, Alert, Spinner, Table, Nav, Image} from 'react-bootstrap';
 import {BrowserRouter, Route, Link, Redirect} from 'react-router-dom';
 import Login from '../Login';
 
 class CompanyAdd extends React.Component{
     constructor(props){
         super(props)
-        this.state = {companyName: '', companyDescription: '',  establishmentDate: [], companies: [], didGetCompany: false}
+        this.state = {companyName: '', companyDescription: '',  establishmentDate: '', companies: [], 
+                        addAttempt: false,
+                        didGetCompany: false,
+                        didUpdate: false
+                    }
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
         this.CompanyForm = this.CompanyForm.bind(this)
@@ -35,7 +39,38 @@ class CompanyAdd extends React.Component{
         });
     }
 
+    componentDidUpdate(){
+        if(this.state.didUpdate){
+            return;
+        }
+
+        fetch('http://localhost:8080/companies', {
+            method:'GET',
+            headers:{ 
+                'Authorization': localStorage.getItem("Authorization"),
+                'Accept':'application/json',
+                'Content-Type':'application/json',
+                'Access-Control-Allow-Credentials':  true,
+                'Access-Control-Allow-Origin':'http://localhost:3000/'
+            },
+            withCredentials: true,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(result =>{
+            this.setState({companies: result.operationObject, didGetCompany: true, didUpdate: true})
+        })
+        .catch(error =>{
+            console.log(error);
+        });
+    }
+
     handleAddClick(){
+        if(!this.state.companyName || !this.state.establishmentDate){
+            this.setState({addAttempt: true});
+            return;
+        }
+
         fetch('http://localhost:8080/companies', {
             method:'POST',
             headers:{ 
@@ -56,6 +91,7 @@ class CompanyAdd extends React.Component{
         .then(response => response.json())
         .then(result =>{
             console.log(result.operationObject);
+            this.setState({didUpdate: false});
         })
         .catch(error =>{
             console.log(error);
@@ -80,6 +116,7 @@ class CompanyAdd extends React.Component{
         .then(response => response.json())
         .then(result =>{
             console.log(result.operationObject);
+            this.setState({didUpdate: false});
         })
         .catch(error =>{
             console.log(error);
@@ -97,16 +134,18 @@ class CompanyAdd extends React.Component{
                 <Form.Group controlId="companyName">
                     <Form.Label>Company Name</Form.Label>
                     <Form.Control name="companyName" type="text" placeholder="Company Name" value={this.state.companyName} onChange={this.handleInputChange}/>
+                    <Alert hidden={this.state.companyName || !this.state.addAttempt} variant="danger">Company name cannot be empty!</Alert>
                 </Form.Group>
                 <Form.Group controlId="establishmentDate">
                     <Form.Label>Establishment Date</Form.Label>
                     <Form.Control name="establishmentDate" type="date" value={this.state.establishmentDate} onChange={this.handleInputChange}/>
+                    <Alert hidden={this.state.establishmentDate || !this.state.addAttempt} variant="danger">Establishment date cannot be empty!</Alert>
                 </Form.Group>
                 <Form.Group controlId="companyDescription">
                     <Form.Label>Company Description</Form.Label>
                     <Form.Control as="textarea" rows="3" name="companyDescription"  placeholder="Company Description" value={this.state.companyDescription} onChange={this.handleInputChange}/>
                 </Form.Group>
-                <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
+                <Button block variant="primary" onClick={()=>{this.handleAddClick()}}>
                     Add
                 </Button>
                 </Form>
@@ -118,9 +157,9 @@ class CompanyAdd extends React.Component{
         return(
             <div>
                 <h1>Companies</h1>
-                <Table striped bordered hover>
+                <Table>
                     <tr>
-                        <th>#</th>
+                        <th>ID</th>
                         <th>Name</th>
                         <th>Operations</th>
                     </tr>
@@ -133,7 +172,7 @@ class CompanyAdd extends React.Component{
                                         {company.name}
                                     </Link>    
                                 </td>
-                                <td><Button variant="danger" onClick={()=>{this.handleRemoveClick(company.name)}}><b>X</b></Button></td>
+                                <td><Button block variant="danger" onClick={()=>{this.handleRemoveClick(company.name)}}>-</Button></td>
                             </tr>
                         )
                     }

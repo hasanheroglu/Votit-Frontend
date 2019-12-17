@@ -234,7 +234,7 @@ class PollGet extends React.Component{
 
     ShowPoll(props){
         if(props.hidden){
-            return <p>Updating the poll...</p>;
+            return <p></p>;
         }
         switch(props.type) {
             case 'standard':
@@ -333,7 +333,7 @@ class PollGet extends React.Component{
                                         <Form.Label>End Date:</Form.Label>
                                         <Form.Control name="updatedEndDate" type="date" value={this.state.updatedEndDate} onChange={this.handleDateChange}/>
                                     </Form.Group>
-                                    <Button variant="success" onClick={()=>{this.handleUpdateClick()}}>Update</Button>
+                                    <Button block variant="success" onClick={()=>{this.handleUpdateClick()}}>Update</Button>
                                 </Form>
                                 <this.ShowPoll hidden={this.state.willUpdate} type={this.state.poll.type}/>
                                 <Button variant="primary" hidden={this.state.willUpdate} onClick={()=>{this.handleVoteClick()}}>Submit</Button>

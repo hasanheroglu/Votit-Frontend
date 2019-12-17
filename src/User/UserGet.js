@@ -55,7 +55,7 @@ class UserGet extends React.Component{
         .then(response => response.json())
         .then(result =>{
             console.log(result);
-            this.setState({company: result.operationObject[0], companyTitles: result.operationObject[0].titles})
+            this.setState({company: result.operationObject, companyTitles: result.operationObject.titles})
         })
         .catch(error =>{
             console.log(error);
