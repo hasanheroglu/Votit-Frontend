@@ -1,6 +1,7 @@
 import React from 'react';
 import {Button, Form, Card, Image, Alert, Table} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
+import * as utils from '../Util';
 
 class PollAdd extends React.Component{
     constructor(props){
@@ -36,45 +37,10 @@ class PollAdd extends React.Component{
 
     componentDidMount(){
         const companyName = this.props.match.params.name;
-
-        var isSystemAdmin = false;
-        var isCompanyAdmin = false;
-        var isPollOwner = false;
-        var isUser = false;
-
-        let roles = localStorage.getItem("Roles");
-        if(roles){
-          if(roles.includes("ROLE_SYSTEM_ADMIN")){
-              isSystemAdmin = true;
-          } else{
-              isSystemAdmin = false;
-          }
-          if(roles.includes("ROLE_COMPANY_ADMIN")){
-              isCompanyAdmin = true;
-          } else{
-              isCompanyAdmin = false;
-          }
-          if(roles.includes("ROLE_POLL_OWNER")){
-            isPollOwner = true;
-          } else{
-            isPollOwner = false;
-          }
-          if(roles.includes("ROLE_USER")){
-            isUser = true;
-          } else{
-            isUser = false;
-          }
-        }
-
-        fetch('http://localhost:8080/companies/' + companyName + '/polls', {
+ 
+        fetch(utils.hostURL + '/companies/' + companyName + '/polls', {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -89,15 +55,9 @@ class PollAdd extends React.Component{
             console.log(error);
         });
 
-        fetch('http://localhost:8080/companies/' + companyName, {
+        fetch(utils.hostURL + '/companies/' + companyName, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -111,15 +71,9 @@ class PollAdd extends React.Component{
         });
 
         let email = localStorage.getItem("Username");
-        fetch('http://localhost:8080/users?email=' + email, {
+        fetch(utils.hostURL + '/users?email=' + email, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -140,15 +94,9 @@ class PollAdd extends React.Component{
 
         if(this.state.selectedTitle != "User"){
 
-            fetch('http://localhost:8080/companies/' + companyName + '/' + this.state.selectedTitle + '/users', {
+            fetch(utils.hostURL + '/companies/' + companyName + '/' + this.state.selectedTitle + '/users', {
                 method:'GET',
-                headers:{ 
-                    'Authorization': localStorage.getItem("Authorization"),
-                    'Accept':'application/json',
-                    'Content-Type':'application/json',
-                    'Access-Control-Allow-Credentials':  true,
-                    'Access-Control-Allow-Origin':'http://localhost:3000/'
-                },
+                headers: utils.headers,
                 withCredentials: true,
                 credentials: 'same-origin'
             })
@@ -161,15 +109,9 @@ class PollAdd extends React.Component{
                 console.log(error);
             });
         } else{
-            fetch('http://localhost:8080/companies/' + companyName + '/users', {
+            fetch(utils.hostURL + '/companies/' + companyName + '/users', {
                 method:'GET',
-                headers:{ 
-                    'Authorization': localStorage.getItem("Authorization"),
-                    'Accept':'application/json',
-                    'Content-Type':'application/json',
-                    'Access-Control-Allow-Credentials':  true,
-                    'Access-Control-Allow-Origin':'http://localhost:3000/'
-                },
+                headers: utils.headers,
                 withCredentials: true,
                 credentials: 'same-origin'
             })
@@ -205,15 +147,9 @@ class PollAdd extends React.Component{
             this.state.voterIdList.push(voterId);
         }
 
-        fetch('http://localhost:8080/companies/' + companyName + '/polls', {
+        fetch(utils.hostURL + '/companies/' + companyName + '/polls', {
             method:'POST',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({title: this.state.title,
@@ -225,8 +161,6 @@ class PollAdd extends React.Component{
                                   maxSelectionCount: this.state.maxSelectionCount,
                                   ownerId: this.state.owner.id
                                 })
-        
-        
         })
         .then(response => response.json())
         .then(result =>{
@@ -459,21 +393,12 @@ class PollAdd extends React.Component{
     }
 
     render(){
-        var isPollOwner = false;
-
-        let roles = localStorage.getItem("Roles");
-        if(roles){
-          if(roles.includes("ROLE_POLL_OWNER")){
-            isPollOwner = true;
-          } else{
-            isPollOwner = false;
-          }
-        }
+        utils.setRoles();
 
         return(    
             <div style={{width:500, margin:0, margin:"auto"}}>
                 <Image src={require('../logo1.jpeg')} rounded fluid />
-                <this.Poll hidden={!isPollOwner}/>
+                <this.Poll hidden={!utils.isPollOwner}/>
                 <br/><h2>Your Polls</h2>
                 <this.PollInfo/>
             </div>

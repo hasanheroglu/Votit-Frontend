@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button, Form, Card, Spinner, Image} from 'react-bootstrap';
+import * as utils from '../Util';
 
 class UserGet extends React.Component{
     constructor(props){
@@ -17,15 +18,9 @@ class UserGet extends React.Component{
     componentDidMount(){ 
         const userId = this.props.match.params.id;
 
-        fetch('http://localhost:8080/users/' + userId, {
+        fetch(utils.hostURL + '/users/' + userId, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"), 
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -40,15 +35,9 @@ class UserGet extends React.Component{
             console.log(error);
         });
 
-        fetch('http://localhost:8080/companies/' + this.state.companyName, {
+        fetch(utils.hostURL + '/companies/' + this.state.companyName, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -61,15 +50,9 @@ class UserGet extends React.Component{
             console.log(error);
         });
 
-        fetch('http://localhost:8080/roles', {
+        fetch(utils.hostURL + '/roles', {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -88,15 +71,9 @@ class UserGet extends React.Component{
     }
 
     handleTitleAddClick(){
-        fetch('http://localhost:8080/users/' + this.state.user.id + '/titles', {
+        fetch(utils.hostURL + '/users/' + this.state.user.id + '/titles', {
             method:'POST',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({title: this.state.title})
@@ -113,15 +90,9 @@ class UserGet extends React.Component{
     }
 
     handleTitleRemoveClick(title){
-        fetch('http://localhost:8080/users/' + this.state.user.id + '/titles', {
+        fetch(utils.hostURL + '/users/' + this.state.user.id + '/titles', {
             method:'DELETE',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({title: title})

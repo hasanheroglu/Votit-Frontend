@@ -1,5 +1,6 @@
 import React from 'react';
 import { Form,FormGroup, FormLabel, FormControl, Button, Image } from 'react-bootstrap';
+import * as utils from './Util';
 import {votit} from './logo1.jpeg';
 
 class Login extends React.Component{
@@ -20,14 +21,9 @@ class Login extends React.Component{
             alert("Password should not be empty!")
         }
 
-        fetch('http://localhost:8080/login', {
+        fetch(utils.hostURL + '/login', {
             method:'POST',
-            headers:{ 
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  'true',
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({email: this.state.email,password: this.state.password})

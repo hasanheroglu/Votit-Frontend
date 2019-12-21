@@ -1,6 +1,9 @@
 import React from 'react';
 import {Button, Form, Card, Spinner, Image} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
+import * as utils from '../Util';
+import CanvasJSReact from '../assets/canvasjs.react';
+var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 class PollGet extends React.Component{
     constructor(props){
@@ -18,21 +21,16 @@ class PollGet extends React.Component{
         this.MultipleChoicePoll = this.MultipleChoicePoll.bind(this)
         this.handleCheckboxInput = this.handleCheckboxInput.bind(this)
         this.handlePrioritizedInput = this.handlePrioritizedInput.bind(this)
+        this.DisplayChart = this.DisplayChart.bind(this)
     }
 
     componentDidMount(){
         const companyName = this.props.match.params.name;
         const pollId = this.props.match.params.pollId;
 
-        fetch('http://localhost:8080/companies/' + companyName + '/polls/' + pollId, {
+        fetch(utils.hostURL + '/companies/' + companyName + '/polls/' + pollId, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -46,15 +44,9 @@ class PollGet extends React.Component{
         });
 
         let email = localStorage.getItem("Username");
-        fetch('http://localhost:8080/users?email=' + email, {
+        fetch(utils.hostURL + '/users?email=' + email, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -74,15 +66,9 @@ class PollGet extends React.Component{
 
         if(!this.state.update){return;}
 
-        fetch('http://localhost:8080/companies/' + companyName + '/polls/' + pollId, {
+        fetch(utils.hostURL + '/companies/' + companyName + '/polls/' + pollId, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -172,24 +158,16 @@ class PollGet extends React.Component{
         const pollId = this.props.match.params.pollId;
         console.log(this.state.optionIds);
 
-        fetch('http://localhost:8080/companies/' + companyName + '/polls/' + pollId, {
+        fetch(utils.hostURL + '/companies/' + companyName + '/polls/' + pollId, {
             method:'POST',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({pollId: pollId, 
                                   optionIds: this.state.optionIds,
                                   votePoints: this.state.votePoints,
                                   voterId: this.state.voter.id 
-                                })
-        
-        
+                                })  
         })
         .then(response => response.json())
         .then(result =>{
@@ -209,15 +187,9 @@ class PollGet extends React.Component{
         //check compatibility with start date and previous end date
 
 
-        fetch('http://localhost:8080/companies/' + companyName + '/polls/' + pollId, {
+        fetch(utils.hostURL + '/companies/' + companyName + '/polls/' + pollId, {
             method:'PUT',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({endDate: this.state.updatedEndDate})
@@ -314,6 +286,42 @@ class PollGet extends React.Component{
         )
     }
 
+    DisplayChart(){
+        var dataPoints = this.state.options.map(option => {
+                var dataPoint = {y: (option.count/this.state.poll.entryCount)*100, label: option.body}
+                return dataPoint; 
+            }
+        );
+
+        const options = {
+			exportEnabled: true,
+			animationEnabled: true,
+			title: {
+				text: "Poll Results"
+			},
+			data: [{
+				type: "pie",
+				startAngle: 75,
+				toolTipContent: "<b>{label}</b>: {y}%",
+				showInLegend: "true",
+				legendText: "{label}",
+				indexLabelFontSize: 16,
+				indexLabel: "{label} - {y}%",
+				dataPoints: dataPoints
+			}]
+        }
+        
+        return (
+            <div>
+                <h1>Poll Results</h1>
+                <CanvasJSChart options = {options} 
+                    /* onRef={ref => this.chart = ref} */
+                />
+                {/*You can get reference to the chart instance as shown above using onRef. This allows you to access all chart properties and methods*/}
+            </div>
+        );
+    }
+
     render(){
         return(
             <div style={{width:500, margin:0, margin:"auto"}}>
@@ -339,6 +347,7 @@ class PollGet extends React.Component{
                                 <Button variant="primary" hidden={this.state.willUpdate} onClick={()=>{this.handleVoteClick()}}>Submit</Button>
                                 </Card.Body>
                             </Card>
+                            <this.DisplayChart/>
                         </div>
                     : <div style={{width:50, margin:0, margin:"auto"}}><Spinner animation="grow" variant="white"><Image src={require('../votit_logo_small.png')} rounded fluid /></Spinner></div>
                 }

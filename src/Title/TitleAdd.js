@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button, Form, Image} from 'react-bootstrap';
+import * as utils from '../Util';
 import {Link} from 'react-router-dom';
 
 class TitleAdd extends React.Component{
@@ -13,20 +14,12 @@ class TitleAdd extends React.Component{
     handleAddClick(){
         const companyName = this.props.match.params.name;
 
-        fetch('http://localhost:8080/companies/' + companyName + '/titles', {
+        fetch(utils.hostURL + '/companies/' + companyName + '/titles', {
             method:'POST',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({title: this.state.title})
-        
-        
         })
         .then(response => response.json())
         .then(result =>{

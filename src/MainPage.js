@@ -3,6 +3,8 @@ import {Navbar, Form, Nav, FormControl, Button, NavDropdown, Image} from 'react-
 import {Redirect} from 'react-router-dom';
 import Login from './Login';
 import logo from "./logo1.jpeg";
+import * as utils from './Util';
+
 
 class MainPage extends React.Component{
     constructor(props){
@@ -12,15 +14,9 @@ class MainPage extends React.Component{
     }
 
     componentDidMount(){
-        fetch('http://localhost:8080/users?email=' + localStorage.getItem("Username"), {
+        fetch(utils.hostURL + '/users?email=' + localStorage.getItem("Username"), {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"), 
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -43,34 +39,7 @@ class MainPage extends React.Component{
     }
 
     render(){  
-        var isSystemAdmin = false;
-        var isCompanyAdmin = false;
-        var isPollOwner = false;
-        var isUser = false;
-
-        let roles = localStorage.getItem("Roles");
-        if(roles){
-          if(roles.includes("ROLE_SYSTEM_ADMIN")){
-            isSystemAdmin = true;
-          } else{
-            isSystemAdmin = false;
-          }
-          if(roles.includes("ROLE_COMPANY_ADMIN")){
-            isCompanyAdmin = true;
-          } else{
-            isCompanyAdmin = false;
-          }
-          if(roles.includes("ROLE_POLL_OWNER")){
-            isPollOwner = true;
-          } else{
-            isPollOwner = false;
-          }
-          if(roles.includes("ROLE_USER")){
-            isUser = true;
-          } else{
-            isUser = false;
-          }
-        }
+      utils.setRoles();
         
         return(
           <div>
@@ -79,12 +48,12 @@ class MainPage extends React.Component{
             <Navbar.Toggle aria- controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="mr-auto">
-                <Nav.Link hidden={isUser} href="/login">Login</Nav.Link>
-                <Nav.Link hidden={!isSystemAdmin} href="/companies">Companies</Nav.Link>
-                <Nav.Link hidden={!isUser} href={"/companies/" + this.state.user.companyName + "/polls"}>My Polls</Nav.Link>
-                <Nav.Link hidden={!isUser} href={"/companies/" + this.state.user.companyName}   >{this.state.user.companyName}</Nav.Link>
-                <Nav.Link hidden={!isUser} href={"/users/" + this.state.user.id}>{this.state.user.name + " " + this.state.user.surname}</Nav.Link>
-                <Nav.Link hidden={!isUser} onClick={() => {this.handleLogoutClick()}}>Logout</Nav.Link>
+                <Nav.Link hidden={utils.isUser} href="/login">Login</Nav.Link>
+                <Nav.Link hidden={!utils.isSystemAdmin} href="/companies">Companies</Nav.Link>
+                <Nav.Link hidden={!utils.isUser} href={"/companies/" + this.state.user.companyName + "/polls"}>My Polls</Nav.Link>
+                <Nav.Link hidden={!utils.isUser} href={"/companies/" + this.state.user.companyName}   >{this.state.user.companyName}</Nav.Link>
+                <Nav.Link hidden={!utils.isUser} href={"/users/" + this.state.user.id}>{this.state.user.name + " " + this.state.user.surname}</Nav.Link>
+                <Nav.Link hidden={!utils.isUser} onClick={() => {this.handleLogoutClick()}}>Logout</Nav.Link>
               </Nav>
             </Navbar.Collapse>
             </Navbar>

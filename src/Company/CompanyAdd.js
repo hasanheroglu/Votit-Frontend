@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, Form, Card, Alert, Spinner, Table, Nav, Image} from 'react-bootstrap';
 import {BrowserRouter, Route, Link, Redirect} from 'react-router-dom';
 import Login from '../Login';
+import * as utils from '../Util';
 
 class CompanyAdd extends React.Component{
     constructor(props){
@@ -18,15 +19,9 @@ class CompanyAdd extends React.Component{
     }
 
     componentDidMount(){
-        fetch('http://localhost:8080/companies', {
+        fetch(utils.hostURL + '/companies', {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -44,15 +39,9 @@ class CompanyAdd extends React.Component{
             return;
         }
 
-        fetch('http://localhost:8080/companies', {
+        fetch(utils.hostURL + '/companies', {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers:utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -71,15 +60,9 @@ class CompanyAdd extends React.Component{
             return;
         }
 
-        fetch('http://localhost:8080/companies', {
+        fetch(utils.hostURL + '/companies', {
             method:'POST',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({name: this.state.companyName, 
@@ -101,15 +84,9 @@ class CompanyAdd extends React.Component{
     handleRemoveClick(companyName){
         //ask for validation!!!
 
-        fetch('http://localhost:8080/companies/' + companyName, {
+        fetch(utils.hostURL + '/companies/' + companyName, {
             method:'DELETE',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'       
         })

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button, Form, Image} from 'react-bootstrap';
-import { thisExpression } from '@babel/types';
+import * as utils from '../Util';
 
 class UserAdd extends React.Component{
     constructor(props){
@@ -28,15 +28,9 @@ class UserAdd extends React.Component{
     componentDidMount(){
         const companyName = this.props.match.params.name;
 
-        fetch('http://localhost:8080/companies/' + companyName + '/titles', {
+        fetch(utils.hostURL + '/companies/' + companyName + '/titles', {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -50,15 +44,9 @@ class UserAdd extends React.Component{
             console.log(error);
         });
 
-        fetch('http://localhost:8080/roles', {
+        fetch(utils.hostURL + '/roles', {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -75,15 +63,9 @@ class UserAdd extends React.Component{
     handleAddClick(){
         const companyName = this.props.match.params.name;
 
-        fetch('http://localhost:8080/companies/' + companyName + '/users', {
+        fetch(utils.hostURL + '/companies/' + companyName + '/users', {
             method:'POST',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({name: this.state.userName,

@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, Form, Card, Spinner, Accordion, Table, Image} from 'react-bootstrap';
 import {BrowserRouter, Route, Link, Redirect} from 'react-router-dom';
 import Login from '../Login';
+import * as utils from '../Util';
 
 class CompanyGet extends React.Component{
     constructor(props){
@@ -23,15 +24,9 @@ class CompanyGet extends React.Component{
 
     componentDidMount(){
         let email = localStorage.getItem("Username");
-        fetch('http://localhost:8080/users?email=' + email, {
+        fetch(utils.hostURL + '/users?email=' + email, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -46,15 +41,9 @@ class CompanyGet extends React.Component{
 
         const companyName = this.props.match.params.name;
 
-        fetch('http://localhost:8080/companies/' + companyName, {
+        fetch(utils.hostURL + '/companies/' + companyName, {
             method:'GET',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'
         })
@@ -73,15 +62,9 @@ class CompanyGet extends React.Component{
     }
 
     handleUserRemoveClick(userId){
-        fetch('http://localhost:8080/companies/' + this.state.company.name + '/users/' + userId, {
+        fetch(utils.hostURL + '/companies/' + this.state.company.name + '/users/' + userId, {
             method:'DELETE',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'        
         })
@@ -95,15 +78,9 @@ class CompanyGet extends React.Component{
     }
 
     handleTitleRemoveClick(titleId){
-        fetch('http://localhost:8080/companies/' + this.state.company.name + '/titles/' + titleId, {
+        fetch(utils.hostURL + '/companies/' + this.state.company.name + '/titles/' + titleId, {
             method:'DELETE',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin'        
         })
@@ -117,21 +94,15 @@ class CompanyGet extends React.Component{
     }
 
     handlePollRemoveClick(pollId){
-
+        
     }
 
     handleUpdateClick(){
         this.setState({willUpdate: false});
 
-        fetch('http://localhost:8080/companies/' + this.state.company.name, {
+        fetch(utils.hostURL + '/companies/' + this.state.company.name, {
             method:'PUT',
-            headers:{ 
-                'Authorization': localStorage.getItem("Authorization"),
-                'Accept':'application/json',
-                'Content-Type':'application/json',
-                'Access-Control-Allow-Credentials':  true,
-                'Access-Control-Allow-Origin':'http://localhost:3000/'
-            },
+            headers: utils.headers,
             withCredentials: true,
             credentials: 'same-origin',
             body: JSON.stringify({  description: this.state.updatedDescription,
@@ -308,34 +279,14 @@ class CompanyGet extends React.Component{
     render(){
         let roles = localStorage.getItem("Roles");
         if(!roles){ return <Redirect to={"/login"} component={Login} />}
-        var isCompanyAdmin = false;
-        var isPollOwner = false;
-        var isSystemAdmin = false;
-
-        if(roles){
-            if(roles.includes("ROLE_COMPANY_ADMIN")){
-              isCompanyAdmin = true;
-            } else{
-              isCompanyAdmin = false;
-            } 
-            if(roles.includes("ROLE_POLL_OWNER")){
-              isPollOwner = true;
-            } else{
-              isPollOwner = false;
-            } 
-            if(roles.includes("ROLE_SYSTEM_ADMIN")){
-                isSystemAdmin = true;
-              } else{
-                isSystemAdmin = false;
-              } 
-        }
-
+        utils.setRoles();
+       
         if(!this.state.didGetUser || !this.state.didGetCompany){
             return(
                 <div style={{width:50, margin:0, margin:"auto"}}><Spinner animation="grow" variant="white"><Image src={require('../votit_logo_small.png')} rounded fluid /></Spinner></div>
             )
         } else{
-            if(this.state.company.name.localeCompare(this.state.user.companyName) !== 0 && !isSystemAdmin){
+            if(this.state.company.name.localeCompare(this.state.user.companyName) !== 0 && !utils.isSystemAdmin){
                 this.props.history.push("/");
                 window.location.reload();
             }
@@ -350,9 +301,9 @@ class CompanyGet extends React.Component{
                             <h1>{this.state.company.name}</h1>
                             <Accordion defaultActiveKey="0">
                                 <this.CompanyInfo/>
-                                <this.CompanyUsers hidden={!isCompanyAdmin}/>
-                                <this.CompanyTitles hidden={!isCompanyAdmin}/>
-                                <this.CompanyPolls hidden={!isPollOwner}/>
+                                <this.CompanyUsers hidden={!utils.isCompanyAdmin}/>
+                                <this.CompanyTitles hidden={!utils.isCompanyAdmin}/>
+                                <this.CompanyPolls hidden={!utils.isPollOwner}/>
                             </Accordion>
                         </div>
                     : <div style={{width:50, margin:0, margin:"auto"}}><Spinner animation="grow" variant="white"><Image src={require('../votit_logo_small.png')} rounded fluid /></Spinner></div>
