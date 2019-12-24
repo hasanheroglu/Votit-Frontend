@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Image} from 'react-bootstrap';
+import {Button, Form, Image, Alert, Table} from 'react-bootstrap';
 import * as utils from '../Util';
 
 class UserAdd extends React.Component{
@@ -8,9 +8,10 @@ class UserAdd extends React.Component{
         this.state = {userName: '', userSurname: '', userBirthdate: '', userPhoneNumber: '', userEmail: '', 
                         userPassword: '', userPasswordConfirmation: '', 
                         role: '', title: '',
-                        selectedRoles: [], availableRoles: [], 
+                        selectedRoles: [{id: 4, role: "ROLE_USER", users: []}], availableRoles: [], 
                         selectedTitles: [], availableTitles: [],                        
-                        updated: false
+                        updated: false,
+                        addAttempt: false
                     }
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
@@ -61,6 +62,17 @@ class UserAdd extends React.Component{
     }
 
     handleAddClick(){
+        if(!this.state.addAttempt){
+            this.setState({addAttempt: true});
+        }
+
+        if(!this.state.userName || !this.state.userSurname || !this.state.userEmail
+            || !this.state.userBirthdate 
+            || !this.state.userPassword || !this.state.userPasswordConfirmation 
+            || this.state.userPassword !== this.state.userPasswordConfirmation){
+                return;
+        }
+
         const companyName = this.props.match.params.name;
 
         fetch(utils.hostURL + '/companies/' + companyName + '/users', {
@@ -83,11 +95,10 @@ class UserAdd extends React.Component{
         .then(response => response.json())
         .then(result =>{
             console.log(result);
-            alert("User Added!");
+            window.location.reload();
         })
         .catch(error =>{
             console.log(error);
-            alert("Cannot add user!");
         });
     }
 
@@ -145,7 +156,7 @@ class UserAdd extends React.Component{
                 <this.StandardInfo/>
                 <this.RoleMenu/>
                 <this.TitleMenu/>
-                <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
+                <Button block variant="primary" onClick={()=>{this.handleAddClick()}}>
                     Add
                 </Button>
             </Form>
@@ -158,14 +169,17 @@ class UserAdd extends React.Component{
             <Form.Group controlId="userName">
                 <Form.Label>Name</Form.Label>
                 <Form.Control name="userName" type="text" placeholder="Name" value={this.state.userName} onChange={this.handleInputChange}/>
+                <Alert variant="danger" hidden={this.state.userName || !this.state.addAttempt} >Name cannot be empty!</Alert>
             </Form.Group>
             <Form.Group controlId="userSurname">
                 <Form.Label>Surname</Form.Label>
                 <Form.Control name="userSurname" type="text" placeholder="Surname" value={this.state.userSurname} onChange={this.handleInputChange}/>
+                <Alert variant="danger" hidden={this.state.userSurname || !this.state.addAttempt} >Surname cannot be empty!</Alert>
             </Form.Group>
             <Form.Group controlId="userBirthdate">
                 <Form.Label>Birthdate</Form.Label>
                 <Form.Control name="userBirthdate" type="date" value={this.state.userBirthdate} onChange={this.handleInputChange}/>
+                <Alert variant="danger" hidden={this.state.userBirthdate || !this.state.addAttempt} >Birthdate cannot be empty!</Alert>
             </Form.Group>
             <Form.Group controlId="userPhoneNumber">
                 <Form.Label>Phone Number</Form.Label>
@@ -174,14 +188,18 @@ class UserAdd extends React.Component{
             <Form.Group controlId="userEmail">
                 <Form.Label>Email</Form.Label>
                 <Form.Control name="userEmail" type="email" value={this.state.userEmail} onChange={this.handleInputChange}/>
+                <Alert variant="danger" hidden={this.state.userEmail || !this.state.addAttempt} >Email cannot be empty!</Alert>
             </Form.Group>
             <Form.Group controlId="userPassword">
                 <Form.Label>Password</Form.Label>
                 <Form.Control name="userPassword" type="password" value={this.state.userPassword} onChange={this.handleInputChange}/>
+                <Alert variant="danger" hidden={this.state.userPassword || !this.state.addAttempt} >Password cannot be empty!</Alert>
             </Form.Group>
             <Form.Group controlId="userPasswordConfirmation">
                 <Form.Label>Password Confirmation</Form.Label>
                 <Form.Control name="userPasswordConfirmation" type="password" value={this.state.userPasswordConfirmation} onChange={this.handleInputChange}/>
+                <Alert variant="danger" hidden={this.state.userPasswordConfirmation || !this.state.addAttempt} >Password confirmation cannot be empty!</Alert>
+                <Alert variant="danger" hidden={this.state.userPassword === this.state.userPasswordConfirmation || !this.state.addAttempt} >Password confirmation must be same with the password!</Alert>
             </Form.Group>
             </div>
         )
@@ -196,22 +214,30 @@ class UserAdd extends React.Component{
                         <Form.Control as="select" name="role" onChange={this.handleInputChange}>
                             <option value="" selected>Select the role</option>                        
                             {
-                                this.state.availableRoles.map(role =>
-                                    <option key={role.id} value={JSON.stringify(role)}>{role.role}</option>
+                                this.state.availableRoles.map(role =>    
+                                    <option hidden={role.role === "ROLE_USER" && (!utils.isSystemAdmin && role.role === "ROLE_SYSTEM_ADMIN")} key={role.id} value={JSON.stringify(role)}>{role.role}</option>
                                 )
                             }   
                         </Form.Control>
                         <br/>
                         <Button block variant="primary" onClick={()=> {this.handleAddRoleClick(this.state.role)}}>Add role</Button>
                 </Form.Group>
-
-                <div inline>
-                    {
-                        this.state.selectedRoles.map(role =>
-    <Button variant="danger" key={role.id} onClick={() => {this.handleRemoveRoleClick(role)}}>{role.role}</Button>
-                        )
-                    }
-                </div>
+                    <Table>
+                        <tr>
+                            <th>Role</th>
+                            <th>Operation</th>
+                        </tr>
+                        {
+                            this.state.selectedRoles.map(role =>
+                                <tr key={role.id}>
+                                    <td>{role.role}</td>
+                                    <td><Button variant="danger" block disabled={role.role === "ROLE_USER"}  onClick={() => {this.handleRemoveRoleClick(role)}}>-</Button></td>
+                                </tr>
+                            )
+                        }
+                    </Table>
+                
+                    
                 <br/>
             </div>
         )
@@ -234,14 +260,22 @@ class UserAdd extends React.Component{
                         <br/>
                         <Button block variant="primary" onClick={()=> {this.handleAddTitleClick(this.state.title)}}>Add title</Button>
                 </Form.Group>
-
-                <div inline>
-                    {
-                        this.state.selectedTitles.map(title =>
-    <Button variant="danger" key={title.id} onClick={() => {this.handleRemoveTitleClick(title)}}>{title.title}</Button>
-                        )
-                    }
-                </div>
+                    <p>Added Titles</p>
+                    <Table>
+                        <tr>
+                            <th>Title</th>
+                            <th>Operation</th>
+                        </tr>
+                        {
+                            this.state.selectedTitles.map(title =>
+                                <tr>
+                                    <td>{title.title}</td>
+                                    <td><Button variant="danger" block onClick={() => {this.handleRemoveTitleClick(title)}}>-</Button></td>
+                                </tr>
+                            )
+                        }
+                    </Table>
+                    
                 <br/>
             </div>
         )

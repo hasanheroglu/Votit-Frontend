@@ -51,7 +51,7 @@ class MainPage extends React.Component{
                 <Nav.Link hidden={utils.isUser} href="/login">Login</Nav.Link>
                 <Nav.Link hidden={!utils.isSystemAdmin} href="/companies">Companies</Nav.Link>
                 <Nav.Link hidden={!utils.isUser} href={"/companies/" + this.state.user.companyName + "/polls"}>My Polls</Nav.Link>
-                <Nav.Link hidden={!utils.isUser} href={"/companies/" + this.state.user.companyName}   >{this.state.user.companyName}</Nav.Link>
+                <Nav.Link hidden={!utils.isCompanyAdmin} href={"/companies/" + this.state.user.companyName}   >{this.state.user.companyName}</Nav.Link>
                 <Nav.Link hidden={!utils.isUser} href={"/users/" + this.state.user.id}>{this.state.user.name + " " + this.state.user.surname}</Nav.Link>
                 <Nav.Link hidden={!utils.isUser} onClick={() => {this.handleLogoutClick()}}>Logout</Nav.Link>
               </Nav>

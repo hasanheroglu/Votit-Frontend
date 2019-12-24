@@ -1,18 +1,24 @@
 import React from 'react';
-import {Button, Form, Image} from 'react-bootstrap';
+import {Button, Form, Image, Alert} from 'react-bootstrap';
 import * as utils from '../Util';
 import {Link} from 'react-router-dom';
 
 class TitleAdd extends React.Component{
     constructor(props){
         super(props)
-        this.state = {title: ''}
+        this.state = {title: '', addAttempt: false}
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleAddClick = this.handleAddClick.bind(this);
     }
 
     handleAddClick(){
         const companyName = this.props.match.params.name;
+
+        this.setState({addAttempt: true});
+
+        if(!this.state.title){
+            return;
+        }
 
         fetch(utils.hostURL + '/companies/' + companyName + '/titles', {
             method:'POST',
@@ -43,6 +49,7 @@ class TitleAdd extends React.Component{
                         <Form.Label>Title</Form.Label>
                         <Form.Control name="title" type="text" placeholder="Title" value={this.state.title} onChange={this.handleInputChange}/>
                     </Form.Group>
+                    <Alert variant="danger" hidden={this.state.title || !this.state.addAttempt} >Title must be filled!</Alert>
                     <Button block variant="primary" type="submit" onClick={()=>{this.handleAddClick()}}>
                         Add
                     </Button>

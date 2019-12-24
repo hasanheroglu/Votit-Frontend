@@ -82,8 +82,6 @@ class CompanyAdd extends React.Component{
     }
 
     handleRemoveClick(companyName){
-        //ask for validation!!!
-
         fetch(utils.hostURL + '/companies/' + companyName, {
             method:'DELETE',
             headers: utils.headers,
@@ -149,7 +147,7 @@ class CompanyAdd extends React.Component{
                                         {company.name}
                                     </Link>    
                                 </td>
-                                <td><Button block variant="danger" onClick={()=>{this.handleRemoveClick(company.name)}}>-</Button></td>
+                                <td><Button block variant="danger"  onClick={()=>{if (window.confirm('Are you sure you wish to delete this item?')) this.handleRemoveClick(company.name)}}>-</Button></td>
                             </tr>
                         )
                     }

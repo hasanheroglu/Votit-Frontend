@@ -9,7 +9,8 @@ class CompanyGet extends React.Component{
         super(props)
         this.state = {company: [], users: [], titles: [], polls: [], didGetCompany: false,
                         user: [], didGetUser: false,
-                        updatedEstablishmentDate: [], updatedDescription: '', willUpdate: false}
+                        updatedEstablishmentDate: [], updatedDescription: '', willUpdate: false,
+                        updated: false}
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleUserRemoveClick = this.handleUserRemoveClick.bind(this)
         this.handleTitleRemoveClick = this.handleTitleRemoveClick.bind(this)
@@ -71,6 +72,7 @@ class CompanyGet extends React.Component{
         .then(response => response.json())
         .then(result =>{
             console.log(result.operationObject);
+            window.location.reload();
         })
         .catch(error =>{
             console.log(error);
@@ -87,6 +89,7 @@ class CompanyGet extends React.Component{
         .then(response => response.json())
         .then(result =>{
             console.log(result.operationObject);
+            window.location.reload();
         })
         .catch(error =>{
             console.log(error);
@@ -180,7 +183,7 @@ class CompanyGet extends React.Component{
                                 <td>{user.name} {user.surname}</td>    
                                 <td>
                                 <Link to={"/users/" + user.id}><Button variant="info" ><b>Info</b></Button></Link>
-                                    <Button hidden={props.hidden} variant="danger" onClick={()=>{this.handleUserRemoveClick(user.id)}}><b>-</b></Button>
+                                    <Button hidden={props.hidden}  variant="danger" onClick={()=>{if (window.confirm('Are you sure you wish to delete this item?')) this.handleUserRemoveClick(user.id)}}><b>-</b></Button>
                                 </td>
                             </tr>
                         )
@@ -216,7 +219,7 @@ class CompanyGet extends React.Component{
                                 this.state.titles.map(title=>
                                     <tr key={title.id}> 
                                         <td>{title.title}</td>
-                                        <td><Button block variant="danger" onClick={()=>{this.handleTitleRemoveClick(title.id)}}>-</Button></td>
+                                        <td><Button block variant="danger" onClick={()=>{if (window.confirm('Are you sure you wish to delete this item?')) this.handleTitleRemoveClick(title.id)}}>-</Button></td>
                                     </tr>
                                 )
                             }
@@ -280,6 +283,9 @@ class CompanyGet extends React.Component{
         let roles = localStorage.getItem("Roles");
         if(!roles){ return <Redirect to={"/login"} component={Login} />}
         utils.setRoles();
+        if(!utils.isCompanyAdmin){
+            return (<p>You are not authorized to see this page.</p>)
+        }
        
         if(!this.state.didGetUser || !this.state.didGetCompany){
             return(

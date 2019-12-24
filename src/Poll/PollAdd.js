@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Card, Image, Alert, Table} from 'react-bootstrap';
+import {Button, Form, Card, Image, Alert, Table, Spinner} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 import * as utils from '../Util';
 
@@ -7,22 +7,27 @@ class PollAdd extends React.Component{
     constructor(props){
         super(props)
         this.state = { title: '', option: '', 
-                        pollType: '', polls: [], startDate:'', endDate:'', options: [], maxSelectionCount: 1,
+                        pollType: '', polls: [], ownedPolls: [], voterPolls: [], startDate:'', endDate:'', options: [], maxSelectionCount: 1,
                         titles: [], selectedTitle: 'User', 
                         voters: [], voterIdList: [], users: [], 
                         owner: [],
                         update: false,
                         addAttempt: false,
+                        didGetPolls: false
                     }
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleAddClick = this.handleAddClick.bind(this)
         this.handleOptionAddClick = this.handleOptionAddClick.bind(this)
         this.handleOptionRemoveClick = this.handleOptionRemoveClick.bind(this)
         this.handleVoterAddClick = this.handleVoterAddClick.bind(this)
+        this.handlePollRemoveClick = this.handlePollRemoveClick.bind(this)
         this.Poll = this.Poll.bind(this)
         this.PollInfo = this.PollInfo.bind(this)
         this.UserList = this.UserList.bind(this)
         this.handleAddAllClick = this.handleAddAllClick.bind(this)
+        this.OwnedPollsInfo = this.OwnedPollsInfo.bind(this)
+        this.VoterPollsInfo = this.VoterPollsInfo.bind(this)
+        this.getPolls = this.getPolls.bind(this)
     }
 
     x = () => {
@@ -206,6 +211,59 @@ class PollAdd extends React.Component{
         this.setState({update: true});
     }
 
+    handlePollRemoveClick(poll){
+        const companyName = this.props.match.params.name;
+
+        fetch(utils.hostURL + '/companies/' + companyName + '/polls/' + poll.id, {
+            method:'DELETE',
+            headers: utils.headers,
+            withCredentials: true,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(result =>{
+            console.log(result);
+            window.location.reload();
+        })
+        .catch(error =>{
+            console.log(error);
+        });
+    }
+
+    getPolls(){
+        fetch(utils.hostURL + '/users/' + this.state.owner.id + '/polls?owned=true' , {
+            method:'GET',
+            headers: utils.headers,
+            withCredentials: true,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(result =>{
+            this.setState({ownedPolls: result.operationObject});
+            console.log(result);
+        })
+        .catch(error =>{
+            console.log(error);
+        });
+
+        fetch(utils.hostURL + '/users/' + this.state.owner.id + '/polls?owned=false' , {
+            method:'GET',
+            headers: utils.headers,
+            withCredentials: true,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(result =>{
+            this.setState({voterPolls: result.operationObject});
+            console.log(result);
+        })
+        .catch(error =>{
+            console.log(error);
+        });
+
+        this.setState({didGetPolls: true})
+    }
+
     UserList(){
         return(
             <div>
@@ -351,15 +409,15 @@ class PollAdd extends React.Component{
         )
     }
 
-    PollInfo(){
-        if(this.state.polls.length === 0){
-            return(
-                <p>You are not invited to any poll.</p>
-            )
+    OwnedPollsInfo(){
+        if(this.state.ownedPolls.length === 0){
+            return <div><p>Owned Polls</p><p>You do not own any poll.</p></div>
         }
 
         return(
-            <Table>
+            <div>
+            
+                <Table>
                 <thead>
                     <tr>
                         <th>Poll Title</th>
@@ -372,7 +430,50 @@ class PollAdd extends React.Component{
                 
                 <tbody>
                 {
-                    this.state.polls.map(poll =>
+                    this.state.ownedPolls.map(poll =>
+                        
+                        <tr key={poll.id}>
+                            <td>{poll.title}</td>
+                            <td>{poll.startDate.substring(0,10)}</td>
+                            <td>{poll.endDate.substring(0,10)}</td>
+                            <td>{poll.ownerId}</td>
+                            <td>
+                            <Link to={"/companies/" + this.props.match.params.name + "/polls/" + poll.id} key={poll.id}>
+                                <Button block variant="success">Vote</Button>
+                            </Link>
+                            <Button block variant="danger" onClick={()=>{if (window.confirm('Are you sure you wish to delete this item?')) this.handlePollRemoveClick(poll)}}>-</Button>
+                            </td>
+                        </tr>
+                    )
+                }
+                </tbody>
+            </Table>
+            </div>
+        )
+    }
+
+    VoterPollsInfo(){
+        if(!this.state.voterPolls){
+            return <p>You do not have any poll to vote.</p>
+        }
+
+        return(
+            <div>
+            <p>Voter Polls</p>
+                <Table>
+                <thead>
+                    <tr>
+                        <th>Poll Title</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Owner ID</th>
+                        <th>Operation</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                {
+                    this.state.voterPolls.map(poll =>
                         
                         <tr key={poll.id}>
                             <td>{poll.title}</td>
@@ -389,11 +490,35 @@ class PollAdd extends React.Component{
                 }
                 </tbody>
             </Table>
+            </div>
+        )
+    }
+
+    PollInfo(){
+        if(this.state.polls.length === 0){
+            return(
+                <p>You are not invited to any poll.</p>
+            )
+        }
+
+        return(
+            <div>
+                <this.OwnedPollsInfo/>
+                <this.VoterPollsInfo/>
+            </div>
+            
         )
     }
 
     render(){
         utils.setRoles();
+        if(!this.state.owner.id){
+            return <div style={{width:50, margin:0, margin:"auto"}}><Spinner animation="grow" variant="white"><Image src={require('../votit_logo_small.png')} rounded fluid /></Spinner></div>;
+        } 
+        
+        if(!this.state.didGetPolls){
+            this.getPolls();
+        }
 
         return(    
             <div style={{width:500, margin:0, margin:"auto"}}>

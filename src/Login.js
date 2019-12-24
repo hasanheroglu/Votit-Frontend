@@ -1,24 +1,25 @@
 import React from 'react';
-import { Form,FormGroup, FormLabel, FormControl, Button, Image } from 'react-bootstrap';
+import { Form,FormGroup, FormLabel, FormControl, Button, Image, Alert } from 'react-bootstrap';
 import * as utils from './Util';
 import {votit} from './logo1.jpeg';
 
 class Login extends React.Component{
     constructor(props){
         super(props)
-        this.state = {email: '', password: '', status: 'WAITING'}
+        this.state = {email: '', password: '', status: 'WAITING', loginAttempt: false}
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleLoginClick = this.handleLoginClick.bind(this)
     }
 
     handleLoginClick(){
+        this.setState({loginAttempt: true});
+
         if(!this.state.email){
-            alert("Username should not be empty!")
             return;
         }
 
         if(!this.state.password){
-            alert("Password should not be empty!")
+            return;
         }
 
         fetch(utils.hostURL + '/login', {
@@ -58,8 +59,11 @@ class Login extends React.Component{
                 <FormGroup>
                     <FormLabel>Email</FormLabel>
                     <FormControl type="text" name="email" value={this.state.email} onChange={this.handleInputChange} />
+                    <Alert variant="danger" hidden={this.state.email || !this.state.loginAttempt} >Email must be filled!</Alert>
                     <FormLabel>Password</FormLabel>
                     <FormControl type="password" name="password" value={this.state.password} onChange={this.handleInputChange} />
+                    <Alert variant="danger" hidden={this.state.password || !this.state.loginAttempt} >Password must be filled!</Alert>
+                    <Alert variant="danger" hidden={this.state.status !== "FAILED" && !this.state.loginAttempt} >Wrong email or password!</Alert>
                     <br/>
                     <Button block onClick={() => this.handleLoginClick()}>Login</Button>
                 </FormGroup>

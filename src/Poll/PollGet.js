@@ -228,7 +228,7 @@ class PollGet extends React.Component{
                             <Form.Check
                             key={option.id}
                             type="radio"
-                            label={" " + option.body + " %" + (option.count/this.state.poll.entryCount)*100}
+                            label={" " + option.body}
                             name="optionIds"
                             value={option.id}
                             onChange={this.handleInputChange}
@@ -259,7 +259,7 @@ class PollGet extends React.Component{
                         <option value="novote" selected>No Vote</option>
                         {this.x()}
                     </Form.Control>
-                    <p>{" " + option.body + " %" + (option.count/this.state.poll.entryCount)*100}</p>
+                    <p>{" " + option.body}</p>
                 </div>
                 )
             }
@@ -275,7 +275,7 @@ class PollGet extends React.Component{
                             <Form.Check
                             key={option.id}
                             type="checkbox"
-                            label={" " + option.body + " %" + (option.count/this.state.poll.entryCount)*100}
+                            label={" " + option.body}
                             name="option"
                             value={option.id}
                             onChange={this.handleCheckboxInput}
